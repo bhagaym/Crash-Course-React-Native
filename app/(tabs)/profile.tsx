@@ -1,105 +1,149 @@
-import {
-  View,
-  SafeAreaView,
-  FlatList,
-  Alert,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, RefreshControl, SectionList, Text } from "react-native";
 import React, { useEffect, useState } from "react";
-import EmptyState from "../../components/EmptyState";
-import { getuserPost, signOut } from "../../lib/appwrite";
-import { Video } from "../../models/Video";
-import VideoCard from "../../components/VideoCard";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { useGlobalContext } from "../../context/GlobalProvider";
-import { icons } from "../../constants";
-import InfoBox from "../../components/InfoBox";
+import { images } from "../../constants";
+import { logoutUser } from "../../controllers/auth";
+import { removeAuth } from "../../lib/myFunction";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Image from "../../components/Image";
+import { ListHeader, ListMenu } from "../../components/ListMenu";
+import { SpinnerOverlay } from "../../components/Spinner";
 
 const Profile = () => {
-  const { user, setUser, setIsLoggedIn } = useGlobalContext();
-  const [data, setData] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    getuserPost(user.$id)
-      .then((response: any) => {
-        setData(response);
-      })
-      .catch((error: any) => {
-        Alert.alert("Error", error.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  const { user, setUser, setIsLoggedIn, setConfirmOptions } =
+    useGlobalContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const logout = async () => {
-    await signOut();
+    setIsLoading(true);
+    await logoutUser(user.id);
+    removeAuth();
     setUser(null);
     setIsLoggedIn(false);
+    setIsLoading(false);
 
     router.replace("/sign-in");
+  };
+
+  const konfirmasiLogout = () => {
+    setConfirmOptions({
+      title: "Keluar Dari Aplikasi",
+      message: "Apakah Anda yakin ingin keluar dari aplikasi?",
+      button: {
+        confirm: {
+          customText: "Keluar",
+          onPress: () => {
+            setConfirmOptions({
+              visibility: false,
+            });
+            logout();
+          },
+        },
+        cancel: {
+          customText: "Batal",
+          onPress: () => {
+            setConfirmOptions({
+              visibility: false,
+            });
+          },
+        },
+      },
+      visibility: true,
+    });
+  };
+
+  const listData = [
+    {
+      title: "Pengaturan Akun",
+      data: [
+        {
+          icon: "ProfileCircle",
+          title: "Edit Profil",
+          subtitle: "Perbarui profil anda",
+          handleClick: () => {
+            router.push("/edit-profile");
+          },
+        },
+        {
+          icon: "Lock",
+          title: "Ganti Password",
+          subtitle: "Atur ulang password Anda",
+          handleClick: () => {
+            router.push("/ganti-password");
+          },
+        },
+      ],
+    },
+    {
+      data: [
+        {
+          icon: "LogOut",
+          title: "Keluar",
+          subtitle: "",
+          handleClick: konfirmasiLogout,
+        },
+      ],
+    },
+  ];
+
+  const fetchData = async () => {
+    // setIsLoading(true);
+    // getuserPost(user.$id)
+    //   .then((response: any) => {
+    //     setData(response);
+    //   })
+    //   .catch((error: any) => {
+    //     Alert.alert("Error", error.message);
+    //   })
+    //   .finally(() => {
+    //     setIsLoading(false);
+    //   });
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  return (
-    <SafeAreaView className="bg-primary h-full">
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.$id?.toString()}
-        renderItem={({ item }) => <VideoCard video={item} />}
-        ListHeaderComponent={() => (
-          <View className="w-full justify-center items-center mt-6 mb-12 px-4">
-            <TouchableOpacity
-              className="w-full items-end mb-10"
-              onPress={logout}
-            >
-              <Image
-                source={icons.logout}
-                resizeMode="contain"
-                className="w-6 h-6"
-              />
-            </TouchableOpacity>
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
 
-            <View className="w-16 h-16 border border-secondary rounded-lg justify-center items-center">
+  return (
+    <SafeAreaView className="h-full pb-10">
+      <SectionList
+        sections={listData}
+        keyExtractor={(item) => item.title}
+        renderSectionHeader={({ section }) => (
+          <ListHeader title={section.title || ""} />
+        )}
+        renderItem={({ item }) => <ListMenu data={item} />}
+        ListHeaderComponent={() => (
+          <View className="w-full justify-center items-center pb-10 px-4">
+            <View className="w-24 h-24 justify-center items-center mt-10">
               <Image
-                source={{ uri: user?.avatar }}
-                className="w-[90%] h-[90%] rounded-lg"
+                source={{ uri: user?.profile_picture }}
+                imageReplace={images.avatar}
+                className="w-24 h-24 rounded-full"
                 resizeMode="cover"
               />
             </View>
 
-            <InfoBox
-              title={user?.username}
-              containerStyles="mt-5"
-              titleStyles="text-lg"
-            />
-            <View className="mt-5 flex-row">
-              <InfoBox
-                title={data.length || 0}
-                subtitle="Post"
-                containerStyles="mr-10"
-                titleStyles="text-xl"
-              />
-              <InfoBox
-                title="1.2K"
-                subtitle="Followers"
-                titleStyles="text-xl"
-              />
-            </View>
+            <Text className="mt-10 text-lg font-pbold">
+              {user?.nama_lengkap}
+            </Text>
+
+            <Text className="mt-3 text-sm font-pregular">{user?.email}</Text>
+
+            <SpinnerOverlay visibility={isLoading} />
           </View>
         )}
-        ListEmptyComponent={() => (
-          <EmptyState
-            title="No Videos Found"
-            subtitle="No videos found for this search query"
-          />
-        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </SafeAreaView>
   );

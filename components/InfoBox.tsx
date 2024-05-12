@@ -1,24 +1,27 @@
-import { View, Text } from 'react-native'
-import React, { FC } from 'react'
+import { View, Text } from "react-native";
+import React, { FC } from "react";
 
 type InfoBoxProps = {
-    title? : string | number | undefined;
-    subtitle? : string | undefined;
-    containerStyles? : string | undefined;
-    titleStyles? : string | undefined;
-}
+  title?: string | number | undefined;
+  subtitle?: string | undefined;
+  containerStyles?: string | undefined;
+  titleStyles?: string | undefined;
+};
 
-const InfoBox: FC<InfoBoxProps> = ({title, subtitle, containerStyles, titleStyles}) => {
+const InfoBox: FC<InfoBoxProps> = ({
+  title,
+  subtitle,
+  containerStyles,
+  titleStyles,
+}) => {
   return (
     <View className={containerStyles}>
-      <Text className={`text-white text-center font-psemibold ${titleStyles}`}>
+      <Text className={`text-center font-psemibold ${titleStyles}`}>
         {title}
       </Text>
-      <Text className='text-sm text-gray-100 text-center font-pregular'>
-        {subtitle}
-      </Text>
+      <Text className="text-sm  text-center font-pregular">{subtitle}</Text>
     </View>
-  )
-}
+  );
+};
 
-export default InfoBox
+export default InfoBox;

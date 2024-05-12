@@ -1,91 +1,142 @@
-import { View, Text, Image, ImageSourcePropType, ColorValue } from 'react-native'
-import { Tabs, Redirect } from 'expo-router'
-import { icons } from '../../constants'
-import { FC } from 'react'
-import { StatusBar } from 'expo-status-bar'
-import { useGlobalContext } from '../../context/GlobalProvider'
-
-type TabIconProps = {
-  icon: ImageSourcePropType | undefined,
-  color: ColorValue | undefined,
-  name: string | null,
-  focused: boolean | null
-}
-
-const TabIcon: FC<TabIconProps> = ({icon, color, name, focused}) => {
-  return (
-    <View className='items-center justify-center gap-2'>
-      <Image 
-        source={icon} 
-        resizeMode='contain' 
-        tintColor={color} 
-        className='w-6 h-6'
-      />
-      <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`} style={{color: color}}>{name}</Text>
-    </View>
-
-  )
-}
+import { View, Text } from "react-native";
+import { Tabs, Redirect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useGlobalContext } from "../../context/GlobalProvider";
+import { getTailwindColor } from "../../lib/myFunction";
+import {
+  Bookmark,
+  Home,
+  IconoirProvider,
+  PlusCircle,
+  ProfileCircle,
+} from "iconoir-react-native";
 
 const TabsLayout = () => {
-  const {isLoading, isLoggedIn, setIsLoggedIn, setUser} = useGlobalContext();
+  const { isLoading, isLoggedIn } = useGlobalContext();
 
-  if(!isLoading && !isLoggedIn){
-    setIsLoggedIn(false);
-    setUser(null);
-    return <Redirect href="/sign-in" />
-  } 
-  
+  if (!isLoading && !isLoggedIn) {
+    return <Redirect href="/sign-in" />;
+  }
+
   return (
-    <>
-      <Tabs screenOptions={{ 
-        tabBarShowLabel: false, 
-        tabBarActiveTintColor: '#FFA001', 
-        tabBarInactiveTintColor: '#CDCDE0',
-        tabBarStyle: {
-          backgroundColor: '#161622',
-          borderTopWidth: 1,
-          borderTopColor: '#232533',
-          height: 84
-        }
-      }}>
-        <Tabs.Screen name="home" options={{
-            title: 'Home',
+    <IconoirProvider
+      iconProps={{
+        color: "black",
+        width: "24px",
+        height: "24px",
+      }}
+    >
+      <Tabs
+        screenOptions={{
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: getTailwindColor("utama")?.toString(),
+          tabBarInactiveTintColor: "#636363",
+          tabBarStyle: {
+            shadowOpacity: 0,
+            backgroundColor: "#fff",
+            borderTopWidth: 1,
+            borderTopColor: "#f4f4f4",
+            height: 50,
+          },
+        }}
+      >
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: "Home",
             headerShown: false,
-            tabBarIcon: ({color, focused}) => (
-              <TabIcon icon={icons.home} color={color} name="Home" focused={focused} />
-            )
-          }} 
+            tabBarIcon: ({ color, focused }) => (
+              <View className="items-center justify-center gap-2">
+                <Home
+                  color={color}
+                  height={20}
+                  width={20}
+                  style={{ marginBottom: -5 }}
+                />
+                <Text
+                  className={`${focused ? "font-psemibold" : "font-pregular"}`}
+                  style={{ color: color, fontSize: 10 }}
+                >
+                  Beranda
+                </Text>
+              </View>
+            ),
+          }}
         />
-        <Tabs.Screen name="bookmark" options={{
-            title: 'Bookmark',
+        <Tabs.Screen
+          name="bookmark"
+          options={{
+            title: "Bookmark",
             headerShown: false,
-            tabBarIcon: ({color, focused}) => (
-              <TabIcon icon={icons.bookmark} color={color} name="Bookmark" focused={focused} />
-            )
-          }} 
+            tabBarIcon: ({ color, focused }) => (
+              <View className="items-center justify-center gap-2">
+                <Bookmark
+                  color={color}
+                  height={20}
+                  width={20}
+                  style={{ marginBottom: -5 }}
+                />
+                <Text
+                  className={`${focused ? "font-psemibold" : "font-pregular"}`}
+                  style={{ color: color, fontSize: 10 }}
+                >
+                  Bookmark
+                </Text>
+              </View>
+            ),
+          }}
         />
-        <Tabs.Screen name="create" options={{
-            title: 'Create',
+        <Tabs.Screen
+          name="create"
+          options={{
+            title: "Create",
             headerShown: false,
-            tabBarIcon: ({color, focused}) => (
-              <TabIcon icon={icons.plus} color={color} name="Create" focused={focused} />
-            )
-          }} 
+            tabBarIcon: ({ color, focused }) => (
+              <View className="items-center justify-center gap-2">
+                <PlusCircle
+                  color={color}
+                  height={20}
+                  width={20}
+                  style={{ marginBottom: -5 }}
+                />
+                <Text
+                  className={`${focused ? "font-psemibold" : "font-pregular"}`}
+                  style={{ color: color, fontSize: 10 }}
+                >
+                  Create
+                </Text>
+              </View>
+            ),
+          }}
         />
-        <Tabs.Screen name="profile" options={{
-            title: 'Profile',
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
             headerShown: false,
-            tabBarIcon: ({color, focused}) => (
-              <TabIcon icon={icons.profile} color={color} name="Profile" focused={focused} />
-            )
-          }} 
+            tabBarIcon: ({ color, focused }) => (
+              <View className="items-center justify-center gap-2">
+                <ProfileCircle
+                  color={color}
+                  height={20}
+                  width={20}
+                  style={{ marginBottom: -5 }}
+                />
+                <Text
+                  className={`${focused ? "font-psemibold" : "font-pregular"}`}
+                  style={{ color: color, fontSize: 10 }}
+                >
+                  Profil Saya
+                </Text>
+              </View>
+            ),
+          }}
         />
       </Tabs>
-      
-      <StatusBar backgroundColor='#161622' style='light' />
-    </>
-  )
-}
 
-export default TabsLayout
+      <StatusBar />
+    </IconoirProvider>
+  );
+};
+
+export default TabsLayout;
