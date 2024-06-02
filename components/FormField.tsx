@@ -16,7 +16,7 @@ type FormFieldProps = {
   otherStyle?: string | undefined;
   keyboardType?: KeyboardTypeOptions | undefined;
   required?: boolean | undefined;
-  errorMessage?: string | undefined;
+  errorMessage?: string | [] | undefined;
 };
 
 export const FormField: FC<FormFieldProps> = ({
@@ -34,6 +34,34 @@ export const FormField: FC<FormFieldProps> = ({
   let star;
   if (required) {
     star = <Text className=" text-danger"> *</Text>;
+  }
+
+  let passwordMode = false;
+  const type_password = [
+    "password",
+    "ulangi password",
+    "ulangi password baru",
+    "password baru",
+    "password lama",
+  ];
+  if (title && type_password.includes(title.toLowerCase())) {
+    passwordMode = true;
+  }
+
+  let displayErrorMessage;
+  if (errorMessage && Array.isArray(errorMessage) && errorMessage.length > 1) {
+    let rangkai = "";
+    errorMessage.map((item) => {
+      rangkai = rangkai + item + "\n";
+    });
+
+    displayErrorMessage = (
+      <Text className="text-sm font-pregular text-danger">{rangkai}</Text>
+    );
+  } else {
+    displayErrorMessage = (
+      <Text className="text-sm font-pregular text-danger">{errorMessage}</Text>
+    );
   }
 
   return (
@@ -54,14 +82,11 @@ export const FormField: FC<FormFieldProps> = ({
           placeholder={placeholder}
           placeholderTextColor="#7A7A7A"
           onChangeText={handleChangeText}
-          secureTextEntry={
-            (title === "Password" || title === "Ulangi Password") &&
-            !showPassword
-          }
+          secureTextEntry={passwordMode && !showPassword}
           keyboardType={keyboardType}
         />
 
-        {(title === "Password" || title === "Ulangi Password") && (
+        {passwordMode && (
           <TouchableOpacity
             onPress={() => {
               setshowPassword(!showPassword);
@@ -72,11 +97,7 @@ export const FormField: FC<FormFieldProps> = ({
         )}
       </View>
 
-      {errorMessage && (
-        <Text className="text-sm font-pregular text-danger">
-          {errorMessage}
-        </Text>
-      )}
+      {displayErrorMessage}
     </View>
   );
 };

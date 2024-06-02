@@ -24,3 +24,18 @@ export const updateProfile = async (formData: Member) => {
       });
   });
 };
+
+export const gantiPassword = async (formData: any) => {
+  const authorization = await renderAuth();
+
+  return new Promise((resolve, rejects) => {
+    axios
+      .post(ENDPOINT + "/ganti_password", formData, authorization)
+      .then((response: AxiosResponse<registerMemberPromise>) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        errorSystem(error, rejects);
+      });
+  });
+};
